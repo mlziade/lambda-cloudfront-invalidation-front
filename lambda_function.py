@@ -23,6 +23,7 @@ def lambda_handler(event, context):
         paths = event.get('paths', ['/*'])  # Default to invalidate all paths
         
         if not distribution_id:
+            print("Error: distribution_id is required in the event payload")
             return {
                 'statusCode': 400,
                 'body': json.dumps({
@@ -35,6 +36,7 @@ def lambda_handler(event, context):
         distribution_exists = check_distribution_exists(cloudfront, distribution_id)
         
         if not distribution_exists:
+            print(f"Distribution {distribution_id} not found or not enabled")
             return {
                 'statusCode': 404,
                 'body': json.dumps({
@@ -49,6 +51,7 @@ def lambda_handler(event, context):
         invalidation_id = create_invalidation(cloudfront, distribution_id, paths)
         
         if not invalidation_id:
+            print(f"Failed to create invalidation for the distribution {distribution_id} with paths: {paths}")
             return {
                 'statusCode': 500,
                 'body': json.dumps({
@@ -56,7 +59,7 @@ def lambda_handler(event, context):
                 })
             }
         
-        print(f"Invalidation created with ID: {invalidation_id}")
+        print(f"Invalidation created with ID: {invalidation_id} for distribution {distribution_id} and paths: {paths}")
         
         # Return immediately after creating invalidation
         return {
